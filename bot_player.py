@@ -571,8 +571,7 @@ class FourWins():
         self.field = field
 
     async def commander(self, message):
-        if str(message.guild
-                ) == "None" and message.author != self.bot.user:  #bot.user
+        if str(message.guild) == "None" and message.author != self.bot.user:  #bot.user
             pass
         elif str(message.guild) != "None" and message.author != self.bot.user:
             if message.content.lower().split()[0] == "ich":
@@ -1002,9 +1001,9 @@ class Chess():
         self.game = None
 
     async def commander(self, message):
-        if str(message.guild) == "None" and message.author != self.bot.user:  #bot.user
-            pass
-        elif str(message.guild) != "None" and message.author != self.bot.user:
+        #if str(message.guild) == "None" and message.author != self.bot.user:  #bot.user
+        #    pass
+        if message.author != self.bot.user:  #elif  #str(message.guild) != "None" and
             if message.content.lower().split()[0] == "ich":
                 if self.get_state() == "PLAYERCHOICE":
                     if (len(self.players) < 2 and self.computer == False) or (len(self.players) < 1):
@@ -1022,14 +1021,11 @@ class Chess():
                         await self.play(message.channel)
                 else:
                     await message.channel.send("There are not enough players.")
-            elif message.content.lower() in [
-                "ki on", "ai on", "bot on", "com", "player too"
-            ]:
+            elif message.content.lower() in ["ki on", "ai on", "bot on", "com", "player too"]:
                 if self.get_state() == "PLAYERCHOICE":
                     await self.add_self()
                 else:
-                    await message.channel.send(
-                        "You are not in the right phase to enter this game.")
+                    await message.channel.send("You are not in the right phase to enter this game.")
             elif message.content.lower() in ["current field", "cf", "field", "f"]:
                 if self.get_state() == "RUNNING":
                     await self.show_current_field()
@@ -1075,13 +1071,14 @@ class Chess():
                 self.players = []
 
     async def add_self(self):
+        print("ki typed")
         if self.computer != True:
             if len(self.players) < 2:
                 self.computer = True
                 self.players += ["computer"]
                 await self.channel.send("I'm playing with you.")
             else:
-                await self.channel.send("There are to enough player.")
+                await self.channel.send("There are to many player.")
         else:
             await self.channel.send("Computer don't play with you anymore.")
             self.players = self.players.remove("computer")
@@ -1334,6 +1331,8 @@ class Bot_xX_Player_Xx(discord.Client):
                         #picture = discord.File(f)
                         #await message.channel.send(file=picture)
                 # Player beenden
+                if Bot_xX_Player_Xx.GAME != None:
+                    Bot_xX_Player_Xx.GAME = None
                 date = datetime.now().strftime('Datum: %d.%m.%Y')
                 time = datetime.now().strftime('Zeit: %H:%M Uhr')
                 print(f"\nPlayer is now offline!\n    {time}\n    {date}")
