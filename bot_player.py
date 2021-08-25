@@ -1,4 +1,3 @@
-import keep_alive
 import discord
 from discord.utils import get
 from datetime import datetime
@@ -9,6 +8,8 @@ import time
 import threading
 import asyncio
 from enum import Enum
+import Games.Chess.Engine.chess_engine as engine
+import Games.Chess.Engine.chess_men as pieces
 
 emojis = [":relieved:", ":upside_down:", ":kissing_heart:", ":relaxed:", ":exploding_head:", ":face_in_clouds:", ":hugging:", ":expressioness:", ":rolling_eyes:", ":face_vomiting:", ":robot:", ":metal:", ":pinched_fingers:", ":raised_hands:", ":middle_finger:", ":lipstick:", ":eyes:", ":tongue:", ":baby:", ":farmer:", ":man_detective:", ":student:", ":teacher:", ":technologist:", ":office_worker:", ":man_astronaut:", ":ninja:", ":man_superhero:", ":man_mage:", ":man_elf:", ":man_vampire:", ":man_zombie:", ":mermaid:", ":pregnant_woman:", ":man_bowing:", ":man_gesturing_no:", ":man_facepalming:", ":man_gesturing_ok:", ":man_in_manual_wheelchair:", ":man_running:", ":bikini:", ":yarn:", ":crown:", ":socks:", ":dog:", ":cat:", ":mouse:", ":tiger:", ":lion_face_:", ":pig:", ":frog:", ":monkey:", ":penguin:", ":bird:", ":hatching_chick:", ":eagle:", ":bat:", ":unicorn:", ":bee:", ":t_rex:", ":sauropod:", ":turtle:", ":snake:", ":shark:", ":fish:", ":kangaroo:", ":dove:", ":sloth:", ":chipmunk:", ":dragon:", ":feather:", ":ringed_planet:", ":full_moon_with_face:", ":earth_americas:", ":snowman:", ":maple_leaf:", ":sunflower:", ":banana:", ":strawberry:", ":poultry_leg:", ":hotdog:", ":hamburger:", ":pizza:", ":taco:", ":burrito:", ":ramen:", ":birthday:", ":doghnut:", ":archery:", ":parachute:", ":man_cartwheeling:", ":person_in_lotus_position:", ":volcano:", ":compass:", ":desktop:", ":axe:", ":smoking:", ":pill:", ":dna:", ":heart:", ":cupid:", ":radioactive:", ":musical_note:", ":purple_circle:", ":green_circle:", ":yellow_circle:", ":small_orange_diamond:", ":small_blue_diamond:", ":dash:", ":flushed:", ":eyes:", ":ok_hand_tone4:", ":pinched_fingers_tone5:", ":nose_tone5:", ":baby_tone5:", ":pinching_hand_tone5:", ":call_me_tone5:", ":middle_finger_tone5:", ":man_gesturing_no_tone5:", ":man_gesturing_ok_tone5:", ":disguised_face:", ":joy:", ":crying_cat_face:", ":person_in_motorized_wheelchair_tone5:"]
 bg_emojis = [":ice_cube:", ":classical_building:", ":shinto_shrine:", ":window:", ":cyclone:", ":parking:", ":free:", ":orange_square:", ":blue_square:", ":red_square:", ":purple_square:", ":green_square:", ":yellow_square:"]
@@ -537,7 +538,6 @@ class TicTacToe():
             self.match += 1
 
 
-# Bearbeiten!
 class FourWins():
     def __init__(self, bot, channel):
         self.GameState = Enum("GameState", "PLAYERCHOICE RUNNING COMPLETED")
@@ -989,6 +989,258 @@ class FourWins():
             self.match += 1
 
 
+class Chess():
+    def __init__(self, bot, channel):
+        self.GameState = Enum("GameState", "PLAYERCHOICE RUNNING COMPLETED")
+        self.state = self.GameState.PLAYERCHOICE
+        self.turn = 0
+        self.players = []
+        self.match = 0
+        self.computer = False
+        self.channel = channel
+        self.bot = bot
+        self.game = None
+
+    async def commander(self, message):
+        if str(message.guild) == "None" and message.author != self.bot.user:  #bot.user
+            pass
+        elif str(message.guild) != "None" and message.author != self.bot.user:
+            if message.content.lower().split()[0] == "ich":
+                if self.get_state() == "PLAYERCHOICE":
+                    if (len(self.players) < 2 and self.computer == False) or (len(self.players) < 1):
+                        await self.add_player(str(message.author), message.channel)
+                    else:
+                        await message.channel.send("There are enough player!")
+                else:
+                    await message.channel.send("You are not in the right phase to enter this game.")
+            elif message.content.lower().split(" ")[0] in [
+                "begin", "play", "start"
+            ]:
+                if len(self.get_player()) == 2:
+                    if self.get_state() == "PLAYERCHOICE" or self.get_state(
+                    ) == "COMPLETED":
+                        await self.play(message.channel)
+                else:
+                    await message.channel.send("There are not enough players.")
+            elif message.content.lower() in [
+                "ki on", "ai on", "bot on", "com", "player too"
+            ]:
+                if self.get_state() == "PLAYERCHOICE":
+                    await self.add_self()
+                else:
+                    await message.channel.send(
+                        "You are not in the right phase to enter this game.")
+            elif message.content.lower() in ["current field", "cf", "field", "f"]:
+                if self.get_state() == "RUNNING":
+                    await self.show_current_field()
+                else:
+                    await message.channel.send(
+                        "You are not in the right phase to enter this game.")
+            elif message.content.lower() in ["player", "mitspieler"]:
+                if self.get_state() == "RUNNING":
+                    await self.show_player()
+                else:
+                    await message.channel.send(
+                        "You are not in the right phase to enter this game.")
+            elif message.content.lower() in ["?", "cp", "player"]:
+                if self.get_state() == "RUNNING":
+                    await self.get_current_player()
+            elif len(message.content.lower().split(" ")) == 3 and message.content.lower().split(" ")[0] in ["move"]:
+                if self.get_state() == "RUNNING":
+                    if self.players[self.player_turn] == str(message.author)[:-5]:
+                        await self.make_turn(message)
+                    else:
+                        await message.channel.send(f"chill {str(message.author)[:-5]}... it's not your turn!")
+            elif len(message.content.lower().split(" ")) == 2 and message.content.lower().split(" ")[0] in ["move"]:
+                if self.get_state() == "RUNNING":
+                    if self.players[self.player_turn] == str(message.author)[:-5]:
+                        await self.get_valid_moves(message)
+                    else:
+                        await message.channel.send(f"chill {str(message.author)[:-5]}... it's not your turn!")
+
+
+    async def add_player(self, name, channel):
+        name = name[:-5]
+        if name not in self.players:
+            if len(self.players) < 2:
+                if name not in self.players:
+                    await channel.send(f"{name} has joined the game :tickets:")
+                    self.players += [name]
+            else:
+                await self.channel.send("There are to enough player.")
+        else:
+            await self.channel.send(f"{name} don't play with you anymore.")
+            self.players = self.players.remove(name)
+            if self.players == None:
+                self.players = []
+
+    async def add_self(self):
+        if self.computer != True:
+            if len(self.players) < 2:
+                self.computer = True
+                self.players += ["computer"]
+                await self.channel.send("I'm playing with you.")
+            else:
+                await self.channel.send("There are to enough player.")
+        else:
+            await self.channel.send("Computer don't play with you anymore.")
+            self.players = self.players.remove("computer")
+            self.computer = False
+            if self.players == None:
+                self.players = []
+
+    def get_player(self):
+        return self.players
+
+    def get_state(self):
+        return self.state.name
+
+    def get_computer(self):
+        return self.computer
+
+    async def get_current_player(self):
+        await self.channel.send(
+            f"{self.players[self.player_turn]} should make his turn...")
+
+    async def show_current_field(self):
+        field = self.game.get_field()
+        show_field = ""
+        for row in range(8, 0, -1):
+            for line in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']:
+                pos = f"{line}{row}"
+
+                if pos[0] == "a":
+                    show_field += f"{pos[1]} |"
+
+                if field[pos] == None:
+                    show_field += "   "
+                elif type(field[pos]) == pieces.Pawn:
+                    if field[pos].site == engine.site.WHITE:
+                        show_field += " P "
+                    else:
+                        show_field += "_P_"
+                elif type(field[pos]) == pieces.Rook:
+                    if field[pos].site == engine.site.WHITE:
+                        show_field += " R "
+                    else:
+                        show_field += "_R_"
+                elif type(field[pos]) == pieces.Knight:
+                    if field[pos].site == engine.site.WHITE:
+                        show_field += " N "
+                    else:
+                        show_field += "_N_"
+                elif type(field[pos]) == pieces.Bishop:
+                    if field[pos].site == engine.site.WHITE:
+                        show_field += " B "
+                    else:
+                        show_field += "_B_"
+                elif type(field[pos]) == pieces.Queen:
+                    if field[pos].site == engine.site.WHITE:
+                        show_field += " Q "
+                    else:
+                        show_field += "_Q_"
+                elif type(field[pos]) == pieces.King:
+                    if field[pos].site == engine.site.WHITE:
+                        show_field += " K "
+                    else:
+                        show_field += "_K_"
+                
+                if pos[0] == "h":
+                    show_field += "\n"
+
+        show_field += "   ------------------------\n"
+        show_field += "    a  b  c  d  e  f  g  h\n\n"
+
+        await self.channel.send(show_field)
+
+    async def show_player(self):
+        txt = ""
+        for i in range(len(self.players)):
+            if i == 0:
+                txt += f"White = {self.players[i]}"
+            else:
+                txt += f"Black = {self.players[i]}"
+        await self.channel.send("txt")
+
+    async def play(self, channel):
+        self.state = self.GameState.RUNNING
+        self.game = engine.Engine(new_game=True, mode=engine.modes.CLASSIC)
+
+        if self.match == 0:
+            txt = ":tada: Lasst das Schach Battle starten! :confetti_ball:\nZu Beginn wähle ich die Reihenfolge der Spieler aus.\n(Außerdem kannst du dir mit 'cf' das aktuelle Spielfeld ausgeben lassen und mit 'mitspieler', die Spieler)."
+            await channel.send(txt)
+
+            white = random.randint(0, 1)
+            black = abs(white - 1)
+
+            if white != 0:  # spieler andersherum, müssen getauscht werden
+                self.players[0], self.players[1] = self.players[
+                    1], self.players[0]
+
+            await self.channel.send(
+                f"White = {self.players[0]}\nBlack = {self.players[1]}. \n\nPlayer white write 'move' and from position and the new position, to make the first turn. Example: move a2 a3.\n(With '?' you can get the Player of the current turn)"
+            )
+
+            await self.show_current_field()
+
+            if self.players[0] == 'computer':
+                await self.computer_turn()
+        else:
+            self.game = engine.Engine(new_game=True, mode=engine.modes.CLASSIC)
+            self.turn = 0
+            self.player_turn = 0
+            await channel.send(f"Let's start the {self.match+1}. match!")
+            white = random.randint(0, 1)
+            black = abs(white - 1)
+
+            if white != 0:  # spieler andersherum, müssen getauscht werden
+                self.players[0], self.players[1] = self.players[1], self.players[0]
+
+            await self.channel.send(
+                f"White = {self.players[0]}\nBlack = {self.players[1]}. \n\nPlayer white write 'move' and from position and the new position, to make the first turn. Example: move a2 a3.\n(With '?' you can get the Player of the current turn)"
+            )
+
+            await self.show_current_field()
+
+            if self.players[0] == 'computer':
+                await self.computer_turn(channel)
+
+    async def make_turn(self, message):
+        content = message.content.lower()
+        if self.game != None and self.state == self.GameState.RUNNING:
+            from_pos, to_pos = content.split(" ")[1], content.split(" ")[2]
+            result = content.run_move(from_pos, to_pos)
+            if len(result[1]) > 0:
+                # check if win
+                if "checkmate" in result[1]:
+                    self.state = self.GameState.COMPLETED
+                    self.match += 1
+                    if self.game.winner == engine.site.WHITE:
+                        await message.channel.send("Black is checkmate!\nWhite wins!")
+                    else:
+                        await message.channel.send("White is checkmate!\nBlack wins!")
+                    return
+                await self.show_current_field()
+                await message.channel.send(result[1])
+            if self.computer:
+                await self.computer_turn(message.channel)
+        else:
+            await message.channel.send("You have to start a Game!")
+
+    async def get_valid_moves(self, message):
+        if self.game != None and self.state == self.GameState.RUNNING:
+            from_pos = message.content.lower().split(" ")[1]
+            result = self.game.get_moves(from_pos)
+            if type(result) == str:
+                await message.channel.send(result)
+
+    async def computer_turn(self, channel):
+        result = self.game.run_random_move()
+        while result[0] == 0:
+            result = self.game.run_random_move()
+        if len(result[1]) > 0:
+            await channel.send(result[1])
+
 
 class Bot_xX_Player_Xx(discord.Client):
     WINS = dict()
@@ -1051,6 +1303,11 @@ class Bot_xX_Player_Xx(discord.Client):
                         )
                         await Bot_xX_Player_Xx.GAME.add_player(
                             str(message.author), message.channel)
+                    elif ' '.join(message.content.lower().split()[1:]) in ["chess", "schach"]:
+                        Bot_xX_Player_Xx.GAME = Chess(
+                            self, message.channel)
+                        await message.channel.send("Zum Mitspielen 'ich' schreiben. Falls ich mitspielen soll, dann 'player too' schreiben.")
+                        await Bot_xX_Player_Xx.GAME.add_player(str(message.author), message.channel)
             elif message.content.lower().split()[0] in [
                 "shut up", "exit", "stop"
             ]:
@@ -1090,7 +1347,8 @@ class Bot_xX_Player_Xx(discord.Client):
                 txt += "You can play Games with me or with your friends, if you want. These are the current games:"
                 txt += "\n----> Schere, Stein, Papier (type: 'SSP', 'Schere')\n"
                 txt += "\n----> TicTacToe (type: 'ttt')\n"
-                txt += "\n\nComming soon:\n----> 4 gewinnt\n"
+                txt += "\n----> 4 gewinnt (type: '4g')\n"
+                txt += "\n----> Schach (type: 'chess')\n"
                 await message.channel.send(txt)
             #elif message.content.lower() == "send gif":
             #    rand = random.randint(0, 1)

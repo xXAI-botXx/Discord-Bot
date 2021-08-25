@@ -1,4 +1,3 @@
-import keep_alive
 import discord
 from discord.utils import get
 from datetime import datetime
@@ -18,61 +17,6 @@ from sympy import *
 import math
 import numpy as np
 import pandas as pd
-
-
-class Bot_Music_Checker():
-	def __init__(self):
-		self.bot = bot
-		self.limit = 5
-		self.running = True
-		print("Timer started.")
-		t = threading.Thread(target=self.start)
-		t.daemon = False
-		t.start()
-
-	def start(self):
-		#loop = asyncio.new_event_loop()
-		#asyncio.set_event_loop(loop)
-		begin = time.time()
-		while True:
-			now = time.time()
-			if now - begin > self.limit:
-				#print("next check...")
-				#await self.bot.next_song()
-				#loop = asyncio.get_event_loop()
-				loop = Bot_xX_Destroyer_Xx.LOOP
-				if Bot_xX_Destroyer_Xx.PLAYER != None and not (
-				    Bot_xX_Destroyer_Xx.PLAYER.is_playing()) and loop != None:
-					Bot_xX_Destroyer_Xx.LOOP.run_until_complete(
-					    self.bot.next_song())
-					#loop.close()
-				begin = time.time()
-
-
-# führt alle x Sekunden etwas aus
-class Timer():
-	def __init__(self, limit: int, func: callable, args=[]):
-		self.limit = limit
-		self.func = func
-		self.args = args
-		self.should_running = True
-
-	def start(self):
-		self.begin = time.time()
-		while self.should_running:
-			now = time.time()
-			if self.begin - now >= self.limit:
-				self.func(self.args)
-				self.begin = time.time()
-
-	def stop(self):
-		self.should_running = False
-
-
-def start_timer(timer: Timer, name="Timer"):
-	t1 = threading.Thread(target=lambda: timer.start(), name=name)
-	t1.start()
-	#t1.join()
 
 
 class Bot_xX_Destroyer_Xx(discord.Client):
@@ -98,6 +42,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             "who is ai-bot", "who is ai_bot", "who is <<ai_bot>>",
             "who is ai-bot?", "who is ai_bot?", "who is <<ai_bot>>?"
         ]
+
         if message.author == bot.user:
             if message.content.lower().split(" ")[0] == "play":
                 self.play_music(message)
@@ -106,6 +51,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
 
         self.count_words(message.content.lower())
 
+        # proof if keyword is in:
         await self.greeting_event(message)
         await self.how_are_you_event(message)
 
@@ -242,6 +188,9 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             txt += "----> size (Größe des plots 4,8)\n"
             txt += "----> small (Größe des Randes => True/False)\n"
             await message.channel.send(txt)
+        elif message.content.lower() in ["bot updates", "updates"]:
+            txt =""
+            await message.channel.send(txt)
 
     async def greeting_event(self, message):
         greeting = [
@@ -272,8 +221,8 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             #between_word = ["are", "geht", "gehts"]
             #end_word = ["dir?", "dir", "you?", "you"]
             formulations = [
-                "und dir?", "how are you?", "and you?", "du?", "you?",
-                "und wie gehts dir?"
+                "und dir?", "how are you?", "and you?", "du?", "dir?", "you?",
+                "und wie gehts dir?", "und wie geht es dir?"
             ]
             if Bot_xX_Destroyer_Xx.GREETING == True and self.check_endswith(
                 txt, formulations):
@@ -306,18 +255,6 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                     return True
         return False
 
-    #def check_saving(self):
-    #    now = datetime.now()
-    #    if Bot_xX_Destroyer_Xx.LAST_SAVE == None:
-    #        Bot_xX_Destroyer_Xx.LAST_SAVE = now
-    #        #DiscordBot.WORDS = self.read_words()
-    #    else:
-    #        diff = now - Bot_xX_Destroyer_Xx.LAST_SAVE
-    #        #if diff.days > 1:
-    #        if diff.seconds > 60:
-    #            Bot_xX_Destroyer_Xx.LAST_SAVE = now
-    #            self.save_words()
-
     def save_words(self):
         print("\nsaving typed words...\n")
         txt = ""
@@ -337,18 +274,6 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         file = path + "/" + name
         with open(file, "w") as f:
             f.write(txt[:-1])
-
-    #def read_words(self) -> dict:
-    #    words = dict()
-    #    with open("./DATA/words.txt", "r") as f:
-    #        f.readlines()
-    #        for i in f:
-    #            item = i.split(",")
-    #            key = item[0].strip()
-    #            value = int(item[1].strip())
-    #            words[key] = value
-    #        return words
-    #    return None
 
     def count_words(self, input: str):
         # Reset alter wörter, wurden schon gespeichert
@@ -635,7 +560,6 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             txt += "```"
             await channel.send(txt)
             
-
     async def play_music(self, message):
         Bot_xX_Destroyer_Xx.LOOP = asyncio.get_event_loop()
         Bot_xX_Destroyer_Xx.LAST_MESSAGE = message
@@ -644,55 +568,37 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             await Bot_xX_Destroyer_Xx.PLAYER.disconnect(force=True)
             Bot_xX_Destroyer_Xx.PLAYER = None
 
-        if len(message.content.lower().split(" ")) == 1:
-            file_name = await self.get_file("some", message)
-        else:
-            file_name = await self.get_file(
-                message.content.lower().split(" ")[1], message)
-        if file_name != None and file_name.split(" ")[0] != "y":
-            song_name = file_name.split("/")[-1]
-            await message.channel.send("Let's go!\nI play '" +
-                                        song_name[0:-4] + "' for you.")
-            channel = get(message.guild.channels,
-                            name=Bot_xX_Destroyer_Xx.VOICE_NAME)
-            voice_channel = await channel.connect()
-            voice_channel.play(
-                discord.FFmpegPCMAudio(source=file_name)
-            )  #was macht am Ende? -> mit after zurücksetzten?
-            Bot_xX_Destroyer_Xx.PLAYER = voice_channel
-            voice_channel.source = discord.PCMVolumeTransformer(
-                voice_channel.source)
-            voice_channel.source.volume = 0.5
-        elif file_name != None and len(file_name.split(" ")) >= 2:
-            try:
-                song_name = " ".join(file_name.split(" ")[2:])
-                await message.channel.send(
-                    "Let's go!\nIt could take a moment.\n I play '" +
-                    song_name + "' for you.")
-                YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
-                FFMPEG_OPTIONS = {
-                    'before_options':
-                    '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-                    'options': '-vn'
-                }
-                channel = get(message.guild.channels,
-                                name=Bot_xX_Destroyer_Xx.VOICE_NAME)
-                voice = await channel.connect()
-                link = file_name.split(" ")[1]
-                with YoutubeDL(YDL_OPTIONS) as ydl:
-                    info = ydl.extract_info(link, download=False)
-                URL = info['formats'][0]['url']
-                voice.play(discord.FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
-                Bot_xX_Destroyer_Xx.PLAYER = voice
-            except youtube_dl.utils.DownloadError:
-                await message.channel.send("Video don't found. Link was '" +
-                                            link + "'")
-                await voice.disconnect()
-                Bot_xX_Destroyer_Xx.PLAYER = None
+        if len(message.content.lower().split(" ")) == 2:
+            if message.content.lower().split(" ")[1] == "help" or message.content.lower().split(" ")[1] == "?":
+                await message.channel.send("You want to play music and don't know how?:poop:\nLet me help you!")
+                txt = "I'm sorry...this area has been shortened. Now you only can use Youtube Videos.\n\n-> For that type 'play y youtubelink*'"
+                await message.channel.send(txt)
+            else:
+                try:
+                    await message.channel.send("Let's go!\nIt could take a moment.")
+                    YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
+                    FFMPEG_OPTIONS = {
+                        'before_options':
+                        '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+                        'options': '-vn'
+                    }
+                    channel = get(message.guild.channels,
+                                    name=Bot_xX_Destroyer_Xx.VOICE_NAME)
+                    voice = await channel.connect()
+                    link = message.content.split(" ")[1]
+                    with YoutubeDL(YDL_OPTIONS) as ydl:
+                        info = ydl.extract_info(link, download=False)
+                    URL = info['formats'][0]['url']
+                    voice.play(discord.FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
+                    Bot_xX_Destroyer_Xx.PLAYER = voice
+                except youtube_dl.utils.DownloadError:
+                    await message.channel.send("Video don't found. Link was '" +
+                                                link + "'")
+                    await voice.disconnect()
+                    Bot_xX_Destroyer_Xx.PLAYER = None
         elif message.content.lower().split(" ")[1] in ["youtube", "y"]:
             try:
-                await message.channel.send("Let's go!\nIt could take a moment."
-                                            )
+                await message.channel.send("Let's go!\nIt could take a moment.")
                 YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
                 FFMPEG_OPTIONS = {
                     'before_options':
@@ -709,152 +615,9 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                 voice.play(discord.FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
                 Bot_xX_Destroyer_Xx.PLAYER = voice
             except youtube_dl.utils.DownloadError:
-                await message.channel.send("Video don't found. Link was '" +
-                                            link + "'")
+                await message.channel.send("Video don't found. Link was '" + link + "'")
                 await voice.disconnect()
                 Bot_xX_Destroyer_Xx.PLAYER = None
-
-    async def get_file(self, mode: str, message) -> str:
-        if mode == "?" or mode == "help":
-            await message.channel.send(
-                "You want to play music and don't know how?:poop:\nLet me help you!"
-            )
-            await message.channel.send(
-                "\n\nType 'play' and after that choice your Style! There are following styles:\n"
-            )
-            styles = "----> Random Music (nothing, 'some', 'music', 'something')\n----> LoFi Music ('lofi')\n"
-            styles += "----> Epic Music ('epic', 'episch')\n----> Dubstep ('dubstep', 'elektro')\n----> Endless Space Music ('endless_space', 'endless')"
-            styles += "\n----> Nightcore ('night', 'nightcore')\n----> Mxmtoon ('mx', 'mxmtoon')\n----> Party Mixes ('party')\n----> Ambience ('amb', 'ambience')\n----> Chill ('chill')"
-            styles += "\n\nWhat? You want to play the mp3 from a Youtube Video?\nYes you can!:sunglasses: Typ 'play y' or 'play youtube' and then your video link."
-            await message.channel.send(styles)
-        elif mode in ["some", "music", "something"]:
-            rand = random.randint(0, 8)
-            if rand == 0:
-                return await self.get_file("mx", message)
-            elif rand == 1:
-                return await self.get_file("lofi", message)
-            elif rand == 2:
-                return await self.get_file("nightcore", message)
-            elif rand == 3:
-                return await self.get_file("party", message)
-            elif rand == 4:
-                return await self.get_file("epic", message)
-            elif rand == 5:
-                return await self.get_file("endless_space", message)
-            elif rand == 6:
-                return await self.get_file("dubstep", message)
-            elif rand == 7:
-                return await self.get_file("ambience", message)
-            elif rand == 8:
-                return await self.get_file("chill", message)
-        elif mode in ["mx", "mxmtoon"]:
-            return os.getcwd() + "/music/mxmtoon.mp3"
-        elif mode in ["lofi"]:
-            path = os.getcwd() + "/music/lofi"
-            files = os.listdir(path)
-            file = random.choice(files)
-            if file.split(" ")[0] == "y":
-                file_path = path + "/" + file
-                with open(file_path, "r") as f:
-                    link = f.readline()
-                return "y " + link + " " + file.strip(" ")[1:-4]
-            else:
-                return os.getcwd() + "/music/lofi/" + file
-        elif mode in ["ambience", "amb"]:
-            path = os.getcwd() + "/music/ambience"
-            files = os.listdir(path)
-            file = random.choice(files)
-            if file.split(" ")[0] == "y":
-                file_path = path + "/" + file
-                with open(file_path, "r") as f:
-                    link = f.readline()
-                return "y " + link + " " + file.strip(" ")[1:-4]
-            else:
-                return os.getcwd() + "/music/ambience/" + file
-        elif mode in ["party"]:
-            path = os.getcwd() + "/music/party"
-            files = os.listdir(path)
-            file = random.choice(files)
-            if file.split(" ")[0] == "y":
-                file_path = path + "/" + file
-                with open(file_path, "r") as f:
-                    link = f.readline()
-                return "y " + link + " " + file.strip(" ")[1:-4]
-            else:
-                return os.getcwd() + "/music/party/" + file
-        elif mode in ["epic", "episch"]:
-            path = os.getcwd() + "/music/epic"
-            files = os.listdir(path)
-            file = random.choice(files)
-            if file.split(" ")[0] == "y":
-                file_path = path + "/" + file
-                with open(file_path, "r") as f:
-                    link = f.readline()
-                return "y " + link + " " + file.strip(" ")[1:-4]
-            else:
-                return os.getcwd() + "/music/epic/" + file
-        elif mode in ["endless_space", "endless"]:
-            path = os.getcwd() + "/music/endless_space"
-            files = os.listdir(path)
-            file = random.choice(files)
-            if file.split(" ")[0] == "y":
-                file_path = path + "/" + file
-                with open(file_path, "r") as f:
-                    link = f.readline()
-                return "y " + link + " " + file.strip(" ")[1:-4]
-            else:
-                return os.getcwd() + "/music/endless_space/" + file
-        elif mode in ["dubstep", "electro"]:
-            path = os.getcwd() + "/music/dubstep"
-            files = os.listdir(path)
-            file = random.choice(files)
-            if file.split(" ")[0] == "y":
-                file_path = path + "/" + file
-                with open(file_path, "r") as f:
-                    link = f.readline()
-                return "y " + link + " " + file.strip(" ")[1:-4]
-            else:
-                return os.getcwd() + "/music/dubstep/" + file
-        elif mode in ["night", "nightcore", "switching_vocals"]:
-            path = os.getcwd() + "/music/nightcore"
-            files = os.listdir(path)
-            file = random.choice(files)
-            if file.split(" ")[0] == "y":
-                file_path = path + "/" + file
-                with open(file_path, "r") as f:
-                    link = f.readline()
-                return "y " + link + " " + file.strip(" ")[1:-4]
-            else:
-                return os.getcwd() + "/music/nightcore/" + file
-        elif mode in ["chill"]:
-            path = os.getcwd() + "/music/chill"
-            files = os.listdir(path)
-            file = random.choice(files)
-            if file.split(" ")[0] == "y":
-                file_path = path + "/" + file
-                with open(file_path, "r") as f:
-                    link = f.readline()
-                return "y " + link + " " + file.strip(" ")[1:-4]
-            else:
-                return os.getcwd() + "/music/chill/" + file
-
-    async def next_song(self):
-        print("Checking music...")
-        if not Bot_xX_Destroyer_Xx.PLAYER == None:
-            if not Bot_xX_Destroyer_Xx.PLAYER.is_playing():
-                if Bot_xX_Destroyer_Xx.PLAYLIST == False:
-                    await Bot_xX_Destroyer_Xx.PLAYER.disconnect(force=True)
-                    Bot_xX_Destroyer_Xx.PLAYER = None
-                else:
-                    if Bot_xX_Destroyer_Xx.LAST_MESSAGE != None:
-                        await self.play_music(Bot_xX_Destroyer_Xx.LAST_MESSAGE)
-                    else:
-                        await Bot_xX_Destroyer_Xx.PLAYER.disconnect(force=True)
-                        Bot_xX_Destroyer_Xx.PLAYER = None
-
-    async def close_music(self):
-        await Bot_xX_Destroyer_Xx.PLAYER.disconnect(force=True)
-        Bot_xX_Destroyer_Xx.PLAYER = None
 
 
 if __name__ == '__main__':
@@ -865,7 +628,6 @@ if __name__ == '__main__':
 	if mode == Modes.BOT_RUNNING:
 		running = True
 		n_loop = 0
-		keep_alive.keep_alive()
 		loop = asyncio.get_event_loop()
 
 		while running:
@@ -875,18 +637,11 @@ if __name__ == '__main__':
 				print("Old Eventloop is closed. \nCreating a new one...\n")
 				loop = asyncio.new_event_loop()
 
-			#timer = Bot_Music_Checker()
-
 			if n_loop % 2 == 0:
 				bot = Bot_xX_Destroyer_Xx()
-				#Bot_xX_Destroyer_Xx.WORDS = bot.read_words()
-				#print("\n",Bot_xX_Destroyer_Xx.WORDS, "\n")
-				#Bot_xX_Destroyer_Xx.LAST_SAVE = datetime.now()
-				#bot.run(my_secret)
 				loop.run_until_complete(bot.start(os.environ['token_1']))
 			else:
 				bot_2 = Bot_xX_Player_Xx()
-				#bot_2.run_bot()
 				loop.run_until_complete(bot_2.start(os.environ['token_2']))
 
 			n_loop += 1

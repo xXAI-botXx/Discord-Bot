@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 import unittest
+import sys
 
 def zip_words() -> str:
     words = ""
@@ -9,7 +10,6 @@ def zip_words() -> str:
     for file in files:
         with open(path+"/"+file, "r") as f:
             words += f.read()+"\n"
-        os.remove(path+"/"+file)
     return words.split("\n")
 
 def words_to_dict(words:str) -> dict:
@@ -24,6 +24,7 @@ def words_to_dict(words:str) -> dict:
                     w_dict[key] += int(value)
             except Exception as e:
                 print(f"Error during word to dict transformation.\nEntry: {word}\n\nError:\n{e}")
+                sys.exit(0)
     return w_dict
 
 def dict_to_words(w_dict:dict) -> str:
@@ -32,8 +33,32 @@ def dict_to_words(w_dict:dict) -> str:
         words += f"{key},{value}\n"
     return words
 
+def remove_old_ones():
+    words = ""
+    path = os.getcwd()+"/DATA"
+    files = os.listdir(path)
+    for file in files:
+        with open(path+"/"+file, "r") as f:
+            words += f.read()+"\n"
+        os.remove(path+"/"+file)
+
+def create_backup(target:str):
+    with open("/DATA/"+target, "r") as f:
+        words = f.read()+"\n"
+
+    backups = os.listdir("/backup")
+    filename = "backup_000"
+    i = 0
+    while filename in backups:
+        i += 1
+        filename = f"backup_{i:03}"
+
+    with open("/backup"+filename, "w") as f:
+        f.write(words)
+
 
 def run():
+    create_backup()
     print("Summerize Data...")
     # collect all words -> and delete these datas
     words = zip_words()
@@ -41,8 +66,10 @@ def run():
     w_dict = words_to_dict(words)
     # make txt_words
     txt_words = dict_to_words(w_dict)
-    # save in a new txt
     print("Save summerized data...")
+    # remove old files
+    remove_old_ones()
+    # save in a new txt
     now = datetime.now()
     name = f"sum_words_{now.day}.{now.month}.{now.year}_{now.hour}:{now.minute}_01.txt"
     path = os.getcwd()+"/DATA"
@@ -55,6 +82,9 @@ def run():
     with open(file, "w") as f:
         f.write(txt_words)
     print("Process is finish.")
+    # create backup
+    create_backup(name)
+    print("Backup has been created.")
 
 class Test(unittest.TestCase):
     def test_words_to_dict(self):
