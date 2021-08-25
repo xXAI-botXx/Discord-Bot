@@ -1,0 +1,5 @@
+Wichtige Info zum Importieren von Chess.
+Der Chess Ordner gehört in den games Ordner.
+
+Vor die Importe müssen 'Games.Chess.' vorangestellt werden.
+Außerdem muss der io-helper und die anderen Implementationen entfernt werden.
