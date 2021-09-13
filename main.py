@@ -195,7 +195,6 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             txt += "\n----> Cleaning"
             txt += "\n----> Musik Deleted (YouTube ohne y möglich)"
             txt += "\n----> Flask Server deaktiviert"
-            txt += "\n----> Beide Bots gleichzeitig online stellen"
             txt += "\n\n----> **v1.2** <----"
             txt += "\n----> 4 Gewinnt hinzugefügt"
             txt += "\n\n----> **v1.1** <----"
