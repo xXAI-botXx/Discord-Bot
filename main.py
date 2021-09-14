@@ -74,7 +74,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             txt += "\n----> exit (deactivates me):shushing_face:"
             txt += "\n----> tut + text (i will get some tutorials for you)"
             txt += "\n----> münzwurf (lässt Grogu eine Münze werfen)"
-            txt += "\n-------------> oder coinflip, coin oder münze"
+            txt += "\n-------------> oder coinflip, flip, coin oder münze"
             txt += "\n----> play (playing music) -> use 'play ?' or 'play help' for more informations"
             txt += "\n----> send gif (Grogu will send a random GIF of himself)"
             txt += "\n----> calc expression (Grogu will calculate the expression)"
@@ -237,7 +237,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         elif message.content.lower() in ["bot news", "news", "bot neues", "neues"]:
             txt = "Ich habe kürzlich Ändertungen bei dem Abspielen von Musik vorgenommen :musical_note:. Zudem gab es interne Änderungen, ich wohne nun wo anders :relaxed:\nAußerdem hat mein Kumpel der Player nun Schach im Angebot :shushing_face: :chess_pawn:\n\nFür mehr Informationen gib **updates** ein oder frage meinen Erschaffer."
             await message.channel.send(txt)
-        elif message.content.lower() in ["münze", "coin", "münzwurf", "coinflip"]:
+        elif message.content.lower() in ["münze", "flip", "coin", "münzwurf", "coinflip"]:
             txt = "Ok ich werfe eine Münze..."
             await message.channel.send(txt)
             txt = f">>> {random.choice(['Kopf', 'Zahl'])} <<<"
