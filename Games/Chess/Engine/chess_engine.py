@@ -41,6 +41,15 @@ class Engine(object):
         global event
         messages = ""
         result = False
+
+        # validate input
+        try:
+            self.field.get_field()[from_pos]
+            self.field.get_field()[to_pos]
+        except KeyError:
+            messages += f"({from_pos}, {to_pos}) is not a position on the field!"
+            return (result, messages)
+
         # move
         if not self.gameover and event == None:
             if self.field.get_field()[from_pos] != None:
@@ -94,14 +103,15 @@ class Engine(object):
             # get all positions
             my_chessmen = []
             for pos in positions:
-                if self.field.field[pos].site == site.WHITE and my_site == "WHITE":
-                    my_chessmen += [self.field.field[pos]]
-                elif self.field.field[pos].site == site.BLACK and my_site == "BLACK":
-                    my_chessmen += [self.field.field[pos]]
+                if self.field.field[pos] != None:
+                    if self.field.field[pos].site == site.WHITE and my_site == "WHITE":
+                        my_chessmen += [pos]
+                    elif self.field.field[pos].site == site.BLACK and my_site == "BLACK":
+                        my_chessmen += [pos]
             # all moves
             all_moves = []
             for my_chessman in my_chessmen:
-                for pos in self.field.valid_moves(my_chessman):
+                for pos in self.field.valid_moves(self.field.field, my_chessman):
                     all_moves += [(my_chessman, pos)]
             # choose a random move
             if my_site == "WHITE":
@@ -111,7 +121,8 @@ class Engine(object):
             move = random.choice(all_moves)
             while self.field.is_check(self.field.move_without_changes(self.field.field, move[0], move[1]), my_site):
                 move = random.choice(all_moves)
-            return move
+            result = self.run_move(move[0], move[1])
+            return (result[0], result[1], move)
 
     def run_many_moves(self, moves:list) -> bool:
         """Runs more than one turn on a Chess field. Returns if the execution worked right."""

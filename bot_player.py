@@ -994,6 +994,7 @@ class Chess():
         self.state = self.GameState.PLAYERCHOICE
         self.turn = 0
         self.players = []
+        self.player_turn = 0
         self.match = 0
         self.computer = False
         self.channel = channel
@@ -1001,9 +1002,9 @@ class Chess():
         self.game = None
 
     async def commander(self, message):
-        #if str(message.guild) == "None" and message.author != self.bot.user:  #bot.user
-        #    pass
-        if message.author != self.bot.user:  #elif  #str(message.guild) != "None" and
+        if str(message.guild) == "None" and message.author != self.bot.user:  #bot.user
+            pass
+        elif message.author != self.bot.user and str(message.guild) != "None":
             if message.content.lower().split()[0] == "ich":
                 if self.get_state() == "PLAYERCHOICE":
                     if (len(self.players) < 2 and self.computer == False) or (len(self.players) < 1):
@@ -1071,7 +1072,6 @@ class Chess():
                 self.players = []
 
     async def add_self(self):
-        print("ki typed")
         if self.computer != True:
             if len(self.players) < 2:
                 self.computer = True
@@ -1107,48 +1107,66 @@ class Chess():
                 pos = f"{line}{row}"
 
                 if pos[0] == "a":
-                    show_field += f"{pos[1]} |"
+                    show_field += f"{self.number_to_str(pos[1])} |"
 
                 if field[pos] == None:
-                    show_field += "   "
+                    show_field += "        "
                 elif type(field[pos]) == pieces.Pawn:
                     if field[pos].site == engine.site.WHITE:
-                        show_field += " P "
+                        show_field += ":mechanic:"
                     else:
-                        show_field += "_P_"
+                        show_field += ":mechanic_tone5:"
                 elif type(field[pos]) == pieces.Rook:
                     if field[pos].site == engine.site.WHITE:
-                        show_field += " R "
+                        show_field += ":cop:"
                     else:
-                        show_field += "_R_"
+                        show_field += ":cop_tone5:"
                 elif type(field[pos]) == pieces.Knight:
                     if field[pos].site == engine.site.WHITE:
-                        show_field += " N "
+                        show_field += ":ninja:"
                     else:
-                        show_field += "_N_"
+                        show_field += ":ninja_tone5:"
                 elif type(field[pos]) == pieces.Bishop:
                     if field[pos].site == engine.site.WHITE:
-                        show_field += " B "
+                        show_field += ":detective:"
                     else:
-                        show_field += "_B_"
+                        show_field += ":detective_tone5:"
                 elif type(field[pos]) == pieces.Queen:
                     if field[pos].site == engine.site.WHITE:
-                        show_field += " Q "
+                        show_field += ":blond_haired_woman:"
                     else:
-                        show_field += "_Q_"
+                        show_field += ":blond_haired_woman_tone5:"
                 elif type(field[pos]) == pieces.King:
                     if field[pos].site == engine.site.WHITE:
-                        show_field += " K "
+                        show_field += ":man_mage:"
                     else:
-                        show_field += "_K_"
+                        show_field += ":man_mage_tone5:"
                 
                 if pos[0] == "h":
                     show_field += "\n"
 
-        show_field += "   ------------------------\n"
-        show_field += "    a  b  c  d  e  f  g  h\n\n"
+        show_field += "      -------------------------------\n"
+        show_field += "        :regional_indicator_a::regional_indicator_b::regional_indicator_c::regional_indicator_d::regional_indicator_e::regional_indicator_f::regional_indicator_g::regional_indicator_h:\n\n"
 
         await self.channel.send(show_field)
+
+    def number_to_str(self, num:int) -> str:
+        if num == "1":
+            return ":one:"
+        elif num == "2":
+            return ":two:"
+        elif num == "3":
+            return ":three:"
+        elif num == "4":
+            return ":four:"
+        elif num == "5":
+            return ":five:"
+        elif num == "6":
+            return ":six:"
+        elif num == "7":
+            return ":seven:"
+        elif num == "8":
+            return ":eight:"
 
     async def show_player(self):
         txt = ""
@@ -1174,14 +1192,16 @@ class Chess():
                 self.players[0], self.players[1] = self.players[
                     1], self.players[0]
 
+            self.player_turn = 0
+
             await self.channel.send(
-                f"White = {self.players[0]}\nBlack = {self.players[1]}. \n\nPlayer white write 'move' and from position and the new position, to make the first turn. Example: move a2 a3.\n(With '?' you can get the Player of the current turn)"
+                f":white_circle:White = {self.players[0]}\n:black_circle:Black = {self.players[1]}. \n\nPlayer white write 'move' and from position and the new position, to make the first turn. Example: move a2 a3.\n(With '?' you can get the Player of the current turn)"
             )
 
             await self.show_current_field()
 
             if self.players[0] == 'computer':
-                await self.computer_turn()
+                await self.computer_turn(self.channel)
         else:
             self.game = engine.Engine(new_game=True, mode=engine.modes.CLASSIC)
             self.turn = 0
@@ -1193,6 +1213,8 @@ class Chess():
             if white != 0:  # spieler andersherum, müssen getauscht werden
                 self.players[0], self.players[1] = self.players[1], self.players[0]
 
+            self.player_turn = self.players[0]
+
             await self.channel.send(
                 f"White = {self.players[0]}\nBlack = {self.players[1]}. \n\nPlayer white write 'move' and from position and the new position, to make the first turn. Example: move a2 a3.\n(With '?' you can get the Player of the current turn)"
             )
@@ -1200,26 +1222,47 @@ class Chess():
             await self.show_current_field()
 
             if self.players[0] == 'computer':
-                await self.computer_turn(channel)
+                await self.computer_turn(self.channel)
+
+    def update_player(self):
+        if self.game != None:
+            player = self.game.turn.name.upper()
+            if player == "WHITE":
+                self.player_turn = 0
+            elif player == "BLACK":
+                self.player_turn = 1
 
     async def make_turn(self, message):
         content = message.content.lower()
         if self.game != None and self.state == self.GameState.RUNNING:
             from_pos, to_pos = content.split(" ")[1], content.split(" ")[2]
-            result = content.run_move(from_pos, to_pos)
+            result = self.game.run_move(from_pos, to_pos)
             if len(result[1]) > 0:
                 # check if win
                 if "checkmate" in result[1]:
                     self.state = self.GameState.COMPLETED
                     self.match += 1
                     if self.game.winner == engine.site.WHITE:
-                        await message.channel.send("Black is checkmate!\nWhite wins!")
+                        await message.channel.send(":black_circle:Black is checkmate!\n:white_circle:White wins!")
                     else:
-                        await message.channel.send("White is checkmate!\nBlack wins!")
+                        await message.channel.send(":white_circle:White is checkmate!\n:black_circle:Black wins!")
                     return
-                await self.show_current_field()
+                if "Patt" in result[1]:
+                    self.state = self.GameState.COMPLETED
+                    self.match += 1
+                    if self.game.winner == engine.site.WHITE:
+                        await message.channel.send("It's Patt! Black can't make a legal move and is not in check.")
+                    else:
+                        await message.channel.send("It's Patt! White can't make a legal move and is not in check.")
+                    return
                 await message.channel.send(result[1])
-            if self.computer:
+            await self.show_current_field()
+            if self.player_turn == 0 and result[0] == 1:
+                await self.channel.send(f":white_circle:White moved from **{from_pos}** to **{to_pos}**")
+            elif self.player_turn == 1 and result[0] == 1:
+                await self.channel.send(f":black_circle:Black moved from **{from_pos}** to **{to_pos}**")
+            self.update_player()
+            if self.computer and self.players[self.player_turn] == "computer":
                 await self.computer_turn(message.channel)
         else:
             await message.channel.send("You have to start a Game!")
@@ -1232,11 +1275,21 @@ class Chess():
                 await message.channel.send(result)
 
     async def computer_turn(self, channel):
-        result = self.game.run_random_move()
+        if self.player_turn == 0:
+            site = "WHITE"
+        else:
+            site = "BLACK"
+        result = self.game.run_random_move(site)
         while result[0] == 0:
-            result = self.game.run_random_move()
+            result = self.game.run_random_move(site)
+        if self.player_turn == 0:
+            await channel.send(f":white_circle:White moved from **{result[2][0]}** to **{result[2][1]}**")
+        else:
+            await channel.send(f":black_circle:Black moved from **{result[2][0]}** to **{result[2][1]}**")
         if len(result[1]) > 0:
             await channel.send(result[1])
+        await self.show_current_field()
+        self.update_player()
 
 
 class Bot_xX_Player_Xx(discord.Client):
