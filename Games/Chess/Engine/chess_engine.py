@@ -87,27 +87,31 @@ class Engine(object):
         return (result, messages)
 
     def run_random_move(self, my_site:str) -> tuple:
-        # get all positions
-        my_chessmen = []
-        for pos in positions:
-            if self.field.field[pos].site == site.WHITE and my_site == "WHITE":
-                my_chessmen += [self.field.field[pos]]
-            elif self.field.field[pos].site == site.BLACK and my_site == "BLACK":
-                my_chessmen += [self.field.field[pos]]
-        # all moves
-        all_moves = []
-        for my_chessman in my_chessmen:
-            for pos in self.field.valid_moves(my_chessman):
-                all_moves += [(my_chessman, pos)]
-        # choose a random move
-        if my_site == "WHITE":
-            my_site = site.WHITE
+        if event == "PROMOTION":
+            choice = random.choice(["KNIGHT", "ROOK", "BISHOP", "QUEEN"])
+            self.pawn_promotion(choice)
         else:
-            my_site = site.BLACK
-        move = random.choice(all_moves)
-        while self.field.is_check(self.field.move_without_changes(self.field.field, move[0], move[1]), my_site):
+            # get all positions
+            my_chessmen = []
+            for pos in positions:
+                if self.field.field[pos].site == site.WHITE and my_site == "WHITE":
+                    my_chessmen += [self.field.field[pos]]
+                elif self.field.field[pos].site == site.BLACK and my_site == "BLACK":
+                    my_chessmen += [self.field.field[pos]]
+            # all moves
+            all_moves = []
+            for my_chessman in my_chessmen:
+                for pos in self.field.valid_moves(my_chessman):
+                    all_moves += [(my_chessman, pos)]
+            # choose a random move
+            if my_site == "WHITE":
+                my_site = site.WHITE
+            else:
+                my_site = site.BLACK
             move = random.choice(all_moves)
-        return move
+            while self.field.is_check(self.field.move_without_changes(self.field.field, move[0], move[1]), my_site):
+                move = random.choice(all_moves)
+            return move
 
     def run_many_moves(self, moves:list) -> bool:
         """Runs more than one turn on a Chess field. Returns if the execution worked right."""

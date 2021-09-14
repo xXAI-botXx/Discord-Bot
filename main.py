@@ -240,6 +240,8 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                 author = str(message.author).split("#")[0]
                 await message.channel.send("Hey " + author +
                                             ", how are you today?")
+                if random.randint(0, 1) == 0:
+                    await message.channel.send("Write **updates** to get all news!")
                 Bot_xX_Destroyer_Xx.GREETING = True
                 #await message.channel.send(file="./GIFs/yoda_greeting.gif")
                 rand = random.randint(0, 1)
