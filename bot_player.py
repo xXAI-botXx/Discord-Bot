@@ -1110,7 +1110,7 @@ class Chess():
                     show_field += f"{self.number_to_str(pos[1])} |"
 
                 if field[pos] == None:
-                    show_field += "        "
+                    show_field += "      "
                 elif type(field[pos]) == pieces.Pawn:
                     if field[pos].site == engine.site.WHITE:
                         show_field += ":mechanic:"
@@ -1256,11 +1256,11 @@ class Chess():
                         await message.channel.send("It's Patt! White can't make a legal move and is not in check.")
                     return
                 await message.channel.send(result[1])
-            await self.show_current_field()
             if self.player_turn == 0 and result[0] == 1:
                 await self.channel.send(f":white_circle:White moved from **{from_pos}** to **{to_pos}**")
             elif self.player_turn == 1 and result[0] == 1:
                 await self.channel.send(f":black_circle:Black moved from **{from_pos}** to **{to_pos}**")
+            await self.show_current_field()
             self.update_player()
             if self.computer and self.players[self.player_turn] == "computer":
                 await self.computer_turn(message.channel)
@@ -1393,7 +1393,7 @@ class Bot_xX_Player_Xx(discord.Client):
                     "Ok...I'm looking for Grogu...bye...")
                 await self.close()
             elif message.content.lower().split()[0] in [
-                "help", "help bot", "hey bot help", "info"
+                "help", "help bot", "hey bot help", "info", "bot?", "i"
             ]:
                 txt = "Hey there, I'm Alino! Alias the Player. :slot_machine: \n\n"
                 txt += "You can play Games with me or with your friends, if you want. These are the current games:"
@@ -1401,6 +1401,7 @@ class Bot_xX_Player_Xx(discord.Client):
                 txt += "\n----> TicTacToe (type: 'ttt')\n"
                 txt += "\n----> 4 gewinnt (type: '4g')\n"
                 txt += "\n----> Schach (type: 'chess')\n"
+                txt += "\n\nTo play a game, you have to:\n    1. initialize the game with **play (gamename)**\n    2. Now all players have to join with **ich**\n    3. At least you start the game with **start** (or begin or play)"
                 await message.channel.send(txt)
             #elif message.content.lower() == "send gif":
             #    rand = random.randint(0, 1)

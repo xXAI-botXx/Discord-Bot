@@ -17,6 +17,7 @@ from sympy import *
 import math
 import numpy as np
 import pandas as pd
+#import pynacl
 
 
 class Bot_xX_Destroyer_Xx(discord.Client):
@@ -55,7 +56,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         await self.greeting_event(message)
         await self.how_are_you_event(message)
 
-        if message.content.lower() in ["help", "help bot", "hey bot help"]:
+        if message.content.lower() in ["help", "help bot", "hey bot help", "bot?", "info", "i"]:
             txt = "Welcome " + str(
                 message.author).split("#")[0] + "!:raised_hands:"
             txt += "\nI'm Grogu, the algorithm based helper:robot: on this shitti Discord Server. \nI think the Members using this Server to learn something...or something else...whatever."
@@ -64,17 +65,22 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             txt += "\nNow you think: ..okei...weird..and what can you do?:thinking:\n"
             txt += "I can do following things:\n"
             txt += "\n----> help (for this message here)"
+            txt += "\n-------------> or info, bot?, i"
+            txt += "\n----> neues (shows latest change)"
+            txt += "\n----> updates (shows updates)"
             txt += "\n----> time (get the current time)"
             txt += "\n----> date (get the current date)"
             txt += "\n----> hey bot (polite conversation) -> you can answer me, if you want."
             txt += "\n----> exit (deactivates me):shushing_face:"
             txt += "\n----> tut + text (i will get some tutorials for you)"
+            txt += "\n----> münzwurf (lässt Grogu eine Münze werfen)"
+            txt += "\n-------------> oder coinflip, coin oder münze"
             txt += "\n----> play (playing music) -> use 'play ?' or 'play help' for more informations"
             txt += "\n----> send gif (Grogu will send a random GIF of himself)"
             txt += "\n----> calc expression (Grogu will calculate the expression)"
             txt += "\n----> f(x) = function (Grogu will draw and informate about the fnction)"
             txt += "\n-------------> for more information type 'math help'"
-            txt += "\n\n----> switch (i change with Alino)\n--------> also 'come over here' or 'player come over here' are accepted"
+            txt += "\n\n----> switch (i change with Alino)\n-------------> also 'come over here' or 'player come over here' are accepted\n-------------> There you can play games :video_game:"
             await message.channel.send(txt)
         elif self.check_startswith(message.content.lower(), [
             "bot switch", "switch", "player, get over here", "get over here",
@@ -195,6 +201,9 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             txt += "\n----> Cleaning"
             txt += "\n----> Musik Deleted (YouTube ohne y möglich)"
             txt += "\n----> Flask Server deaktiviert"
+            txt += "\n----> Münzwurf hinzugefügt"
+            txt += "\n----> Benutzerfreundlichkeit verbessert"
+            txt += "\n--------> mehr Keywords zur Hilfe, Hilfe wurde verbessert"
             txt += "\n\n----> **v1.2** <----"
             txt += "\n----> 4 Gewinnt hinzugefügt"
             txt += "\n\n----> **v1.1** <----"
@@ -225,6 +234,15 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             txt += "\n\n----> **v0.0** <----"
             txt += "\n----> Bot Entstehung"
             await message.channel.send(txt)
+        elif message.content.lower() in ["bot news", "news", "bot neues", "neues"]:
+            txt = "Ich habe kürzlich Ändertungen bei dem Abspielen von Musik vorgenommen :musical_note:. Zudem gab es interne Änderungen, ich wohne nun wo anders :relaxed:\nAußerdem hat mein Kumpel der Player nun Schach im Angebot :shushing_face: :chess_pawn:\n\nFür mehr Informationen gib **updates** ein oder frage meinen Erschaffer."
+            await message.channel.send(txt)
+        elif message.content.lower() in ["münze", "coin", "münzwurf", "coinflip"]:
+            txt = "Ok ich werfe eine Münze..."
+            await message.channel.send(txt)
+            time.sleep(1)
+            txt = f"{random.choice(['Kopf', 'Zahl'])}"
+            await message.channel.send(txt)
 
     async def greeting_event(self, message):
         greeting = [
@@ -240,8 +258,19 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                 author = str(message.author).split("#")[0]
                 await message.channel.send("Hey " + author +
                                             ", how are you today?")
-                if random.randint(0, 1) == 0:
-                    await message.channel.send("Write **updates** to get all news!")
+                num = random.randint(0, 7)
+                if num == 0:
+                    await message.channel.send("Schreib **updates** um eine Übersicht über meine Updates/Features in Erfahrung zu bringen :face_in_clouds:")
+                elif num == 1:
+                    await message.channel.send("Schreib **neues** um das neuste zu erfahren :newspaper2:")
+                elif num == 2:
+                    await message.channel.send("Schreib **help** um alle Informationen über mich zu erhalten :heart_on_fire:")
+                elif num == 3:
+                    await message.channel.send("Wusstest du, dass ich sehr begabt in Mathe bin? :sunglasses:\n\nSchreibe **math help** für mehr Informationen :1234:")
+                elif num == 4:
+                    await message.channel.send("Wenn du Lust auf Spielen hast, sprich doch mit dem Player! Er freut sich immer, wenn sich Spielkameraden finden lassen.\n\nSchreibe **switch**, um ihn Online zu holen.")
+                elif num == 5:
+                    await message.channel.send("Es ist eindeutig zu ruhig hier. Schreibe **play https://www.youtube.com/watch?v=lEeMjXOqM64** um die Hütte brennen zu lassen :sunglasses:")
                 Bot_xX_Destroyer_Xx.GREETING = True
                 #await message.channel.send(file="./GIFs/yoda_greeting.gif")
                 rand = random.randint(0, 1)
