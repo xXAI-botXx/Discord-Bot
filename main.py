@@ -240,7 +240,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         elif message.content.lower() in ["münze", "flip", "coin", "münzwurf", "coinflip"]:
             txt = "Ok ich werfe eine Münze..."
             await message.channel.send(txt)
-            txt = f">>> {random.choice(['Kopf', 'Zahl'])} <<<"
+            txt = f"--> {random.choice(['Kopf', 'Zahl'])} <--"
             await message.channel.send(txt)
 
     async def greeting_event(self, message):
