@@ -50,6 +50,9 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             else:
                 return
 
+        if str(message.channel) == "chatroom":
+            return
+
         self.count_words(message.content.lower())
 
         # proof if keyword is in:

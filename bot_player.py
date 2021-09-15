@@ -1307,6 +1307,9 @@ class Bot_xX_Player_Xx(discord.Client):
     # a message is posted
     async def on_message(self, message):
         try:
+            if str(message.channel) == "chatroom":
+                return
+
             private_ = str(message.guild).split(" ")[0] == "None"
             if private_ and Bot_xX_Player_Xx.GAME != None:
                 await Bot_xX_Player_Xx.GAME.commander(message)
