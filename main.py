@@ -17,7 +17,6 @@ from sympy import *
 import math
 import numpy as np
 import pandas as pd
-#import pynacl
 
 
 class Bot_xX_Destroyer_Xx(discord.Client):
@@ -549,7 +548,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                                 value = value.replace("]", "")
                             if value.count(",") == 1:
                                 value = value.split(",")
-                                ylim = [int(value[0]), int(value[1])]
+                                ylim = [float(value[0]), float(value[1])]
                         elif key in ["xlim"]:
                             if value.startswith("["):
                                 value = value.replace("[", "")
@@ -557,7 +556,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                                 value = value.replace("]", "")
                             if value.count(",") == 1:
                                 value = value.split(",")
-                                xlim = [int(value[0]), int(value[1])]
+                                xlim = [float(value[0]), float(value[1])]
                         elif key in ["coordinate", "c"]:
                             coordinate = (value.title() == "True")
                         elif key in ["small"]:
