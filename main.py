@@ -1,22 +1,30 @@
 import discord
 from discord.utils import get
 from datetime import datetime
+
 import sys
 import os
 import random
+
 from youtube_dl import YoutubeDL
 import youtube_dl
 import time
 import threading
 import asyncio
-from bot_player import Bot_xX_Player_Xx
 import enum
+
+from bot_player import Bot_xX_Player_Xx
 import word_zipper
+from extensions import list_ext
+
 import matplotlib.pyplot as plt
+
 from sympy import *
 import math
 import numpy as np
 import pandas as pd
+
+from keep_alive import keep_alive
 
 
 class Bot_xX_Destroyer_Xx(discord.Client):
@@ -52,13 +60,17 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         if str(message.channel) == "chatroom":
             return
 
+        print(f"Message: {message.content}")
+
         self.count_words(message.content.lower())
 
         # proof if keyword is in:
         await self.greeting_event(message)
         await self.how_are_you_event(message)
 
-        if message.content.lower() in ["help", "help bot", "hey bot help", "bot?", "info", "i"]:
+        if message.content.lower() in [
+                "help", "help bot", "hey bot help", "bot?", "info", "i"
+        ]:
             txt = "Welcome " + str(
                 message.author).split("#")[0] + "!:raised_hands:"
             txt += "\nI'm Grogu, the algorithm based helper:robot: on this shitti Discord Server. \nI think the Members using this Server to learn something...or something else...whatever."
@@ -85,9 +97,9 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             txt += "\n\n----> switch (i change with Alino)\n-------------> also 'come over here' or 'player come over here' are accepted\n-------------> There you can play games :video_game:"
             await message.channel.send(txt)
         elif self.check_startswith(message.content.lower(), [
-            "bot switch", "switch", "player, get over here", "get over here",
-            "player get over here", "alino get over here",
-            "alino, get over here"
+                "bot switch", "switch", "player, get over here",
+                "get over here", "player get over here", "alino get over here",
+                "alino, get over here"
         ]):
             # Grogu beenden
             date = datetime.now().strftime('Datum: %d.%m.%Y')
@@ -125,7 +137,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                     picture = discord.File(f)
                     await message.channel.send(file=picture)
         elif message.content.lower().split(" ")[0] in [
-            "tutorial", "tut", "tuts", "help"
+                "tutorial", "tut", "tuts", "help"
         ]:
             tut_str = message.content.lower().split(' ')[1:]
             url = f"https://www.youtube.com/results?search_query={'+'.join(tut_str)}"
@@ -133,7 +145,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         elif message.content.lower().split(" ")[0] == "play":
             await self.play_music(message)
         elif message.content.lower() in [
-            "stop music", "stop playing", "stop play", "stop"
+                "stop music", "stop playing", "stop play", "stop"
         ]:
             if Bot_xX_Destroyer_Xx.PLAYER != None:
                 await message.channel.send("Wait...I'm stopping this!")
@@ -155,7 +167,9 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                 picture = discord.File(f)
                 await message.channel.send(file=picture)
         elif message.content.lower() == "wer hat den olymp geschaffen?":
-            await message.channel.send("Syon hat als Zeichen für seine Dankbarkeit den Olymp für die mächtigen Götter geschaffen.")
+            await message.channel.send(
+                "Syon hat als Zeichen für seine Dankbarkeit den Olymp für die mächtigen Götter geschaffen."
+            )
         elif message.content.lower() in who_ai:
             await message.channel.send(
                 "Praise the Creator of all and nothing!\n\nWith him the World and all of its began and with him all will end..."
@@ -168,12 +182,17 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                 picture = discord.File(f)
                 await message.channel.send(file=picture)
         elif message.content.lower().split(" ")[0] in ["rechne", "calc"]:
-            await self.calc(" ".join(message.content.lower().split(" ")[1:]), message.channel)
-        elif message.content.lower().startswith("f(x) =") or message.content.lower().startswith("f(x)="):
+            await self.calc(" ".join(message.content.lower().split(" ")[1:]),
+                            message.channel)
+        elif message.content.lower().startswith(
+                "f(x) =") or message.content.lower().startswith("f(x)="):
             if len(message.content.lower().split("=")) == 2:
-                await self.draw_func(message.content.lower().split("=")[1], None,message.channel)
+                await self.draw_func(message.content.lower().split("=")[1],
+                                     None, message.channel)
             elif len(message.content.lower().split("=")) == 3:
-                await self.draw_func(message.content.lower().split("=")[1], message.content.lower().split("=")[2],message.channel)
+                await self.draw_func(message.content.lower().split("=")[1],
+                                     message.content.lower().split("=")[2],
+                                     message.channel)
         elif message.content.lower() == "math help":
             txt = "Willkommen zur Hilfe für das Mathe Modul von mir, Grogu."
             txt += "\nZum einen kann ich dir Dinge ausrechen (1+3 oder 35%23...). Hierfür gibt es das Schlüsselwort **calc** und anschließend die Rechnung. Außerdem kannst du auch sin und cos ganz normal verwenden :)"
@@ -236,14 +255,21 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             txt += "\n\n----> **v0.0** <----"
             txt += "\n----> Bot Entstehung"
             await message.channel.send(txt)
-        elif message.content.lower() in ["bot news", "news", "bot neues", "neues"]:
+        elif message.content.lower() in [
+                "bot news", "news", "bot neues", "neues"
+        ]:
             txt = "Ich habe kürzlich Ändertungen bei dem Abspielen von Musik vorgenommen :musical_note:. Zudem gab es interne Änderungen, ich wohne nun wo anders :relaxed:\nAußerdem hat mein Kumpel der Player nun Schach im Angebot :shushing_face: :chess_pawn:\n\nFür mehr Informationen gib **updates** ein oder frage meinen Erschaffer."
             await message.channel.send(txt)
-        elif message.content.lower() in ["münze", "flip", "coin", "münzwurf", "coinflip"]:
+        elif message.content.lower() in [
+                "münze", "flip", "coin", "münzwurf", "coinflip"
+        ]:
             txt = "Ok ich werfe eine Münze..."
             await message.channel.send(txt)
             txt = f"--> {random.choice(['Kopf', 'Zahl'])} <--"
             await message.channel.send(txt)
+        elif len(message.content.lower().split(" ")
+                 ) > 1 and message.content.lower().split(" ")[1] in ["list"]:
+            list_ext.controller(message.content.lower())
 
     async def greeting_event(self, message):
         greeting = [
@@ -258,20 +284,32 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                         return
                 author = str(message.author).split("#")[0]
                 await message.channel.send("Hey " + author +
-                                            ", how are you today?")
+                                           ", how are you today?")
                 num = random.randint(0, 7)
                 if num == 0:
-                    await message.channel.send("Schreib **updates** um eine Übersicht über meine Updates/Features in Erfahrung zu bringen :face_in_clouds:")
+                    await message.channel.send(
+                        "Schreib **updates** um eine Übersicht über meine Updates/Features in Erfahrung zu bringen :face_in_clouds:"
+                    )
                 elif num == 1:
-                    await message.channel.send("Schreib **neues** um das neuste zu erfahren :newspaper2:")
+                    await message.channel.send(
+                        "Schreib **neues** um das neuste zu erfahren :newspaper2:"
+                    )
                 elif num == 2:
-                    await message.channel.send("Schreib **help** um alle Informationen über mich zu erhalten :heart_on_fire:")
+                    await message.channel.send(
+                        "Schreib **help** um alle Informationen über mich zu erhalten :heart_on_fire:"
+                    )
                 elif num == 3:
-                    await message.channel.send("Wusstest du, dass ich sehr begabt in Mathe bin? :sunglasses:\n\nSchreibe **math help** für mehr Informationen :1234:")
+                    await message.channel.send(
+                        "Wusstest du, dass ich sehr begabt in Mathe bin? :sunglasses:\n\nSchreibe **math help** für mehr Informationen :1234:"
+                    )
                 elif num == 4:
-                    await message.channel.send("Wenn du Lust auf Spielen hast, sprich doch mit dem Player! Er freut sich immer, wenn sich Spielkameraden finden lassen.\n\nSchreibe **switch**, um ihn Online zu holen.")
+                    await message.channel.send(
+                        "Wenn du Lust auf Spielen hast, sprich doch mit dem Player! Er freut sich immer, wenn sich Spielkameraden finden lassen.\n\nSchreibe **switch**, um ihn Online zu holen."
+                    )
                 elif num == 5:
-                    await message.channel.send("Es ist eindeutig zu ruhig hier. Schreibe **play https://www.youtube.com/watch?v=lEeMjXOqM64** um die Hütte brennen zu lassen :sunglasses:")
+                    await message.channel.send(
+                        "Es ist eindeutig zu ruhig hier. Schreibe **play https://www.youtube.com/watch?v=lEeMjXOqM64** um die Hütte brennen zu lassen :sunglasses:"
+                    )
                 Bot_xX_Destroyer_Xx.GREETING = True
                 #await message.channel.send(file="./GIFs/yoda_greeting.gif")
                 rand = random.randint(0, 1)
@@ -291,7 +329,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                 "und wie gehts dir?", "und wie geht es dir?"
             ]
             if Bot_xX_Destroyer_Xx.GREETING == True and self.check_endswith(
-                txt, formulations):
+                    txt, formulations):
                 await message.channel.send("I'm fine, thanks for asking!")
                 rand = random.randint(0, 1)
                 if rand == 1:
@@ -351,7 +389,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                 ":",
                 "").replace("/", "").replace("=", "").replace("+", "").replace(
                     "-", "").replace("*", "").replace("#",
-                                                        "").replace("\n", "")
+                                                      "").replace("\n", "")
         # Splitting
         words = words.split(" ")
         # Saving
@@ -365,7 +403,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         # save words after each message
         self.save_words()
 
-    def is_str_float(self, numb:str) -> bool:
+    def is_str_float(self, numb: str) -> bool:
         if numb.isdigit():
             return False
 
@@ -375,9 +413,16 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         except:
             return False
 
-    def is_expr_calc(self, expr:str) -> bool:
+    def is_expr_calc(self, expr: str) -> bool:
         # prüfe, ob auch echt math expr
-        test_expr = expr.replace("(", "").replace(")", "").replace(" ", "").replace(",", ".").replace("sin", "").replace("cos", "").replace("sqrt", "").replace("e", "").replace("pi", "").replace("tan", "")
+        test_expr = expr.replace("(", "").replace(")", "").replace(
+            " ",
+            "").replace(",",
+                        ".").replace("sin", "").replace("cos", "").replace(
+                            "sqrt",
+                            "").replace("e",
+                                        "").replace("pi",
+                                                    "").replace("tan", "")
         operators = ["+", "*", "**", "/", "//", "%", "-"]
         last_ops = ["/", "*"]
 
@@ -398,7 +443,8 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                         cur_elem = char
             elif char in operators:
                 cur_int = False
-                if char in ["+", "-"] and (cur_elem in operators or cur_elem == ""):     # wird nicht gespeichert
+                if char in ["+", "-"] and (cur_elem in operators or cur_elem
+                                           == ""):  # wird nicht gespeichert
                     pass
                 else:
                     if cur_elem in last_ops:
@@ -414,11 +460,11 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         if len(cur_elem) > 0:
             expressions += [cur_elem]
             cur_elem = ""
-                    
+
         # its right?
         for i, v in enumerate(expressions):
-            if i%2 == 0:
-                if not(v.isdigit()) and not(self.is_str_float(v)):
+            if i % 2 == 0:
+                if not (v.isdigit()) and not (self.is_str_float(v)):
                     return False
             else:
                 if v not in operators:
@@ -427,7 +473,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             return False
         return True
 
-    async def calc(self, expr:str, channel):
+    async def calc(self, expr: str, channel):
         expr = expr.replace("^", "**").replace(":", "/")
 
         # prüfe, ob auch echt math expr
@@ -441,7 +487,12 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         # calc + message
         await channel.send(f"{expr} = {result}")
 
-    async def build_func(self, func:str, channel, n=100, xlim=[-10, 10], ylim=None) -> list:
+    async def build_func(self,
+                         func: str,
+                         channel,
+                         n=100,
+                         xlim=[-10, 10],
+                         ylim=None) -> list:
         func = func.replace("^", "**").replace(":", "/")
 
         # testing
@@ -453,15 +504,18 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             return
 
         # build results
-        func = func.replace("sin", "np.sin").replace("cos", "np.cos").replace("tan", "np.tan").replace("e", "np.e").replace("pi", "np.pi").replace("sqrt", "np.sqrt")
+        func = func.replace("sin", "np.sin").replace("cos", "np.cos").replace(
+            "tan", "np.tan").replace("e",
+                                     "np.e").replace("pi", "np.pi").replace(
+                                         "sqrt", "np.sqrt")
 
         x = np.linspace(xlim[0], xlim[1], n)
         #y = sympify(func).subs({'x': x}).evalf()
-        y = eval(func)    # -> x wird zu Varable x -> mit Vido sicherer machen?
+        y = eval(func)  # -> x wird zu Varable x -> mit Vido sicherer machen?
 
         # ylim
         if ylim != None:
-            df = pd.DataFrame({"x":x, "y":y})
+            df = pd.DataFrame({"x": x, "y": y})
             df = df[(df.y > ylim[0]) & (df.y < ylim[1])]
             x, y = (df.x.to_numpy(), df.y.to_numpy())
 
@@ -474,9 +528,9 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         color = 'white'
         bg_color = 'white'
         function_color = "steelblue"
-        linestyle='-'
-        linewidth = 2.0 
-        marker='None'
+        linestyle = '-'
+        linewidth = 2.0
+        marker = 'None'
         lim = 10
         n = 100
         x_size = 15
@@ -515,7 +569,9 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                             function_color = value
                         elif key in ["grid"]:
                             grid = (value.title() == "True")
-                        elif key in ["aufleitung", "integration", "stammfunktion"]:
+                        elif key in [
+                                "aufleitung", "integration", "stammfunktion"
+                        ]:
                             if value.isdigit():
                                 aufleitungs_grad = int(value)
                         elif key in ["ableitung"]:
@@ -562,7 +618,9 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                         elif key in ["small"]:
                             small = (value.title() == "True")
                 except:
-                    await channel.send(f"Die Argumente der Funktion wurden teilweise falsch eingegeben. Denke daran: 'key':'value'")
+                    await channel.send(
+                        f"Die Argumente der Funktion wurden teilweise falsch eingegeben. Denke daran: 'key':'value'"
+                    )
 
         if xlim == None:
             xlim = [-lim, lim]
@@ -573,13 +631,26 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         elif ylim == None:
             ylim = [result[1].min(), result[1].max()]
         if result == "None":
-            await channel.send("I have problems to draw this function. Are you shure, that this function is correct?")
+            await channel.send(
+                "I have problems to draw this function. Are you shure, that this function is correct?"
+            )
         else:
             try:
-                with plt.rc_context({'axes.edgecolor':color, 'xtick.color':color, 'ytick.color':color, 'figure.facecolor':bg_color, 'axes.facecolor':bg_color}):
-                    cm = 1/2.54  # centimeters in inches
-                    plt.figure(figsize=((x_size*cm, y_size*cm)))
-                    plt.plot(result[0], result[1], color=function_color, linestyle=linestyle, marker=marker, linewidth=linewidth)
+                with plt.rc_context({
+                        'axes.edgecolor': color,
+                        'xtick.color': color,
+                        'ytick.color': color,
+                        'figure.facecolor': bg_color,
+                        'axes.facecolor': bg_color
+                }):
+                    cm = 1 / 2.54  # centimeters in inches
+                    plt.figure(figsize=((x_size * cm, y_size * cm)))
+                    plt.plot(result[0],
+                             result[1],
+                             color=function_color,
+                             linestyle=linestyle,
+                             marker=marker,
+                             linewidth=linewidth)
                     plt.grid(grid)
                     plt.xlim(xlim)
                     plt.ylim(ylim)
@@ -592,16 +663,16 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                         ax.spines['left'].set_position('zero')
                         ax.spines['right'].set_color('none')
                     #plt.show()
-                    path = os.getcwd()+"/functions"
+                    path = os.getcwd() + "/functions"
                     filename = "function_001.png"
                     files = os.listdir(path)
                     i = 2
                     while filename in files:
                         filename = f"function_{i:03d}.png"
                         i += 1
-                    file = path+"/"+filename
+                    file = path + "/" + filename
                     plt.savefig(file, transparent=transparent)
-                    picture = discord.File(path+"/"+filename)
+                    picture = discord.File(path + "/" + filename)
                     await channel.send(file=picture)
             except Exception as e:
                 print(f"Error during drawing:\n{e}")
@@ -625,7 +696,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                 txt += f"Grad {i+1}: f'(x) = {last_func}\n".replace("**", "^")
             txt += "```"
             await channel.send(txt)
-            
+
     async def play_music(self, message):
         Bot_xX_Destroyer_Xx.LOOP = asyncio.get_event_loop()
         Bot_xX_Destroyer_Xx.LAST_MESSAGE = message
@@ -635,13 +706,18 @@ class Bot_xX_Destroyer_Xx(discord.Client):
             Bot_xX_Destroyer_Xx.PLAYER = None
 
         if len(message.content.lower().split(" ")) == 2:
-            if message.content.lower().split(" ")[1] == "help" or message.content.lower().split(" ")[1] == "?":
-                await message.channel.send("You want to play music and don't know how?:poop:\nLet me help you!")
+            if message.content.lower().split(
+                    " ")[1] == "help" or message.content.lower().split(
+                        " ")[1] == "?":
+                await message.channel.send(
+                    "You want to play music and don't know how?:poop:\nLet me help you!"
+                )
                 txt = "I'm sorry...this area has been shortened. Now you only can use Youtube Videos.\n\n-> For that type 'play y youtubelink*'"
                 await message.channel.send(txt)
             else:
                 try:
-                    await message.channel.send("Let's go!\nIt could take a moment.")
+                    await message.channel.send(
+                        "Let's go!\nIt could take a moment.")
                     YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
                     FFMPEG_OPTIONS = {
                         'before_options':
@@ -649,7 +725,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                         'options': '-vn'
                     }
                     channel = get(message.guild.channels,
-                                    name=Bot_xX_Destroyer_Xx.VOICE_NAME)
+                                  name=Bot_xX_Destroyer_Xx.VOICE_NAME)
                     voice = await channel.connect()
                     link = message.content.split(" ")[1]
                     with YoutubeDL(YDL_OPTIONS) as ydl:
@@ -658,13 +734,14 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                     voice.play(discord.FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
                     Bot_xX_Destroyer_Xx.PLAYER = voice
                 except youtube_dl.utils.DownloadError:
-                    await message.channel.send("Video don't found. Link was '" +
-                                                link + "'")
+                    await message.channel.send(
+                        "Video don't found. Link was '" + link + "'")
                     await voice.disconnect()
                     Bot_xX_Destroyer_Xx.PLAYER = None
         elif message.content.lower().split(" ")[1] in ["youtube", "y"]:
             try:
-                await message.channel.send("Let's go!\nIt could take a moment.")
+                await message.channel.send("Let's go!\nIt could take a moment."
+                                           )
                 YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
                 FFMPEG_OPTIONS = {
                     'before_options':
@@ -672,7 +749,7 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                     'options': '-vn'
                 }
                 channel = get(message.guild.channels,
-                                name=Bot_xX_Destroyer_Xx.VOICE_NAME)
+                              name=Bot_xX_Destroyer_Xx.VOICE_NAME)
                 voice = await channel.connect()
                 link = message.content.split(" ")[2]
                 with YoutubeDL(YDL_OPTIONS) as ydl:
@@ -681,35 +758,39 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                 voice.play(discord.FFmpegPCMAudio(URL, **FFMPEG_OPTIONS))
                 Bot_xX_Destroyer_Xx.PLAYER = voice
             except youtube_dl.utils.DownloadError:
-                await message.channel.send("Video don't found. Link was '" + link + "'")
+                await message.channel.send("Video don't found. Link was '" +
+                                           link + "'")
                 await voice.disconnect()
                 Bot_xX_Destroyer_Xx.PLAYER = None
 
 
 if __name__ == '__main__':
-	Modes = enum.Enum("Modes", "BOT_RUNNING WORDS_SAVING")
-	mode = Modes.WORDS_SAVING
-	mode = Modes.BOT_RUNNING
+    Modes = enum.Enum("Modes", "BOT_RUNNING WORDS_SAVING")
+    mode = Modes.WORDS_SAVING
+    mode = Modes.BOT_RUNNING
 
-	if mode == Modes.BOT_RUNNING:
-		running = True
-		n_loop = 0
-		loop = asyncio.get_event_loop()
+    # start empty server
+    keep_alive()
 
-		while running:
-			print("\nnext loop", n_loop)
+    if mode == Modes.BOT_RUNNING:
+        running = True
+        n_loop = 0
+        loop = asyncio.get_event_loop()
 
-			if loop.is_closed():
-				print("Old Eventloop is closed. \nCreating a new one...\n")
-				loop = asyncio.new_event_loop()
+        while running:
+            print("\nnext loop", n_loop)
 
-			if n_loop % 2 == 0:
-				bot = Bot_xX_Destroyer_Xx()
-				loop.run_until_complete(bot.start(os.environ['token_1']))
-			else:
-				bot_2 = Bot_xX_Player_Xx()
-				loop.run_until_complete(bot_2.start(os.environ['token_2']))
+            if loop.is_closed():
+                print("Old Eventloop is closed. \nCreating a new one...\n")
+                loop = asyncio.new_event_loop()
 
-			n_loop += 1
-	elif mode == Modes.WORDS_SAVING:
-		word_zipper.run()
+            if n_loop % 2 == 0:
+                bot = Bot_xX_Destroyer_Xx()
+                loop.run_until_complete(bot.start(os.environ['token_1']))
+            else:
+                bot_2 = Bot_xX_Player_Xx()
+                loop.run_until_complete(bot_2.start(os.environ['token_2']))
+
+            n_loop += 1
+    elif mode == Modes.WORDS_SAVING:
+        word_zipper.run()
