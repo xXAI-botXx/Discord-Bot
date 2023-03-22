@@ -24,6 +24,11 @@ import math
 import numpy as np
 import pandas as pd
 
+import openai
+#from chatgpt import Conversation
+#from chatgpt.errors import INVALID_ACCESS_TOKEN, CHATGPT_API_ERROR, CONFIG_FILE_ERROR, UNKNOWN_ERROR, LOGIN_ERROR, TIMEOUT_ERROR, CONNECTION_ERROR
+#import chatgpt
+
 from keep_alive import keep_alive
 
 
@@ -36,6 +41,14 @@ class Bot_xX_Destroyer_Xx(discord.Client):
     VOICE_NAME = "Versammlung der Mächtigen"
     WORDS = dict()
     LAST_SAVE = None
+
+    # for chatgpt
+    #CHATGPT_CONVERSATION = Conversation(access_token=os.environ["openai-key"],
+    #                                    email=os.environ["openai_email"],
+    #                                    password=os.environ["openai_password"])
+
+    # Set up the OpenAI API client
+    openai.api_key = os.environ["openai-key"]
 
     # log in
     async def on_ready(self):
@@ -270,6 +283,54 @@ class Bot_xX_Destroyer_Xx(discord.Client):
         elif len(message.content.lower().split(" ")
                  ) > 1 and message.content.lower().split(" ")[1] in ["list"]:
             list_ext.controller(message.content.lower())
+        elif message.content.lower().split(" ")[0] in [
+                "gpt", "gpt:", "chatgpt", "chatgpt:", "magic", "magic:"
+        ]:
+            if len(message.content.lower().split(
+                    " ")) > 1 and message.content.lower().split(" ")[1] in [
+                        "neustart", "reset"
+                    ]:
+                Bot_xX_Destroyer_Xx.CHATGPT_CONVERSATION.reset()
+                await message.channel.send(
+                    f"Ich habe meinen Kollegen gebeten die Unterhaltung zu vergessen."
+                )
+                return
+            try:
+                await message.channel.send(
+                    "Warte ich frage schnell meinen Kollegen :)")
+                request = openai.ChatCompletion.create(
+                    engine="text-davinci-003",
+                    prompt=message.content.lower().split(" ")[1:],
+                    max_tokens=1024,
+                    n=1,
+                    stop=None,
+                    temperature=0.5,
+                )
+                response = request.choices[0].text
+                await message.channel.send(response)
+            except openai.error.RateLimitError:
+                await message.channel.send(
+                    "Leider hat mein Kollege gerade keine Zeit, versuche es später noch einmal."
+                )
+            #await message.channel.send(
+            #    "Warte ich frage schnell meinen Kollegen :)\n     -> das könnte einen Moment dauern..."
+            #)
+            #try:
+            #    request = " ".join(message.content.split(" ")[1:])
+            #    print(request)
+            #    response = Bot_xX_Destroyer_Xx.CHATGPT_CONVERSATION.chat(
+            #        message.content.split(" ")[1:])
+            #    await message.channel.send(f"{response}")
+            #    return
+            #except chatgpt.errors.ChatgptError as e:
+            #    print(e)
+            #    await message.channel.send(
+            #        "Leider hat mein Kollege gerade keine Zeit. Versuche es später noch einmal."
+            #    )
+            #except Exception:
+            #    await message.channel.send(
+            #        "Ein unbekannter Fehler ist bei der Anfrage entstanden....tut mir leid :("
+            #    )
 
     async def greeting_event(self, message):
         greeting = [
