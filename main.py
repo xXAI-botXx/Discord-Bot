@@ -58,6 +58,11 @@ class Bot_xX_Destroyer_Xx(discord.Client):
 
     # a message is posted
     async def on_message(self, message):
+
+        # check word summerizer
+        if len([i for i in os.listdir("./DATA") if not i.startswith("sum_words")]) > 50:
+            word_zipper.run()
+        
         message.content = message.content.replace("```", "")
         who_ai = [
             "who is ai-bot", "who is ai_bot", "who is <<ai_bot>>",
