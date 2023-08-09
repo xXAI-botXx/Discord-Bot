@@ -31,7 +31,6 @@ import openai
 
 from keep_alive import keep_alive
 
-
 class Bot_xX_Destroyer_Xx(discord.Client):
     PLAYER = None
     LAST_MESSAGE = None
@@ -60,9 +59,11 @@ class Bot_xX_Destroyer_Xx(discord.Client):
     async def on_message(self, message):
 
         # check word summerizer
-        if len([i for i in os.listdir("./DATA") if not i.startswith("sum_words")]) > 50:
+        if len(
+            [i for i in os.listdir("./DATA") if not i.startswith("sum_words")
+             ]) > 50:
             word_zipper.run()
-        
+
         message.content = message.content.replace("```", "")
         who_ai = [
             "who is ai-bot", "who is ai_bot", "who is <<ai_bot>>",
@@ -314,6 +315,10 @@ class Bot_xX_Destroyer_Xx(discord.Client):
                 response = request.choices[0].text
                 await message.channel.send(response)
             except openai.error.RateLimitError:
+                await message.channel.send(
+                    "Leider hat mein Kollege gerade keine Zeit, versuche es später noch einmal."
+                )
+            except openai.error.InvalidRequestError:
                 await message.channel.send(
                     "Leider hat mein Kollege gerade keine Zeit, versuche es später noch einmal."
                 )
@@ -835,6 +840,9 @@ if __name__ == '__main__':
     mode = Modes.WORDS_SAVING
     mode = Modes.BOT_RUNNING
 
+    intents = discord.Intents.default()
+    intents.message_content = True
+
     # start empty server
     keep_alive()
 
@@ -851,10 +859,10 @@ if __name__ == '__main__':
                 loop = asyncio.new_event_loop()
 
             if n_loop % 2 == 0:
-                bot = Bot_xX_Destroyer_Xx()
+                bot = Bot_xX_Destroyer_Xx(intents=intents)
                 loop.run_until_complete(bot.start(os.environ['token_1']))
             else:
-                bot_2 = Bot_xX_Player_Xx()
+                bot_2 = Bot_xX_Player_Xx(intents=intents)
                 loop.run_until_complete(bot_2.start(os.environ['token_2']))
 
             n_loop += 1
